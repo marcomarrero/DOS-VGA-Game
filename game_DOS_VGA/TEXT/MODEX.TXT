@@ -1,0 +1,214 @@
+ÄÄÄÄÄÄÄÄÄÄÄ
+ MODEX.TPU
+ÄÄÄÄÄÄÄÄÄÄÄ
+ Modex - Documentaci¢n/Informaci¢n/Etc.
+ Copyright (c) 1995 Marco A. Marrero. Derechos Reservados
+ Licencia para Trilogy Software.
+
+ Cualquier uso de estas funciones por personas fuera de este grupo es
+ totalmente ilegal y conllevaria acci¢n legal.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Que rayos es?
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  Son rutinas que utilizan el famoso ModoX. ModoX tiene su nombre porque los
+idiotas que hicieron el VGA BIOS no supieron parece como hacer rutinas de
+gr ficas para estos modos, y los morones que hicieron el hardware de VGA
+nisiquiera se dignaron en documentar eso (o quizas ni lo sabian).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Que es ModoX
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  El est ndar VGA es que tienen 256K de video. Delen gracias a IBM por
+semejante barbaridad y por eso salieron las SuperVGA que son 1000% incompa-
+tibles unas con otras en resoluciones que no son VGA (como 640x480 en 256
+colores). ModoX NO es SuperVGA pero se acerca mucho.
+
+  Al parecer, Michael Abrash imvestig¢ el hardware de VGA y pudo crear
+unos modos nuevos con reprogramar la tarjeta de video. Por desgracia
+Microsoft ahora es due¤o de Abrash... Al menos Windows quiz s vaya mas
+rapidito.
+
+  ModoX ofrece las siguientes ventajas:
+        ş Acceso a los 256K de video. Pero, con limitaciones gracias al
+          hardware idiota (segmentos) de las PC gracias a la basura del
+          8086 de Intel. (Debieron haber puesto un 68000 en la PC).
+
+        ş Trasnferencia de video-video 32 bits. (Transferencia de PC a
+          video es de 8 bits y cuidao). Mas agradecimientos al hardware
+          mediocre de los idiotas de IBM.
+
+        ş Transferencia de video 4 bytes a la vez, pero siempre escribe
+          del mismo color en posiciones m£ltiplos de 4.
+
+        ş Nuevas resoluciones como 320x240, 320x400 y 360x480.
+
+        ş Ya que toda la memoria de video es accesible, el scrolling y
+          el split ahora si tienen uso.
+
+  Lo triste de ModoX es el problema de los segmentos. Al contrario de
+las tarjetas SuperVGA que utilizan 128K de la memoria de gr ficas. Los
+imb‚ciles de IBM dividieron 64K para que se yo (A000-AFFF), menos de 64K
+para colores (B800-BFFF). Y un chin para texto en monochrome (B000-????).
+Lo mas ir¢nico es que VGA en modo 13h utiliza el adrress A000 y el texto
+B8000... Pero como hay alg£n bisorioco con una tarjeta VGA y una Mono,
+no quisieron arriesgar incompatibilidad.
+
+  Oh si, la cuesti¢n es como accesar 256K de video en solo 64K de acceso.
+En lugar de usar t‚cnicas antiguas como una "ventana", los idiotas lo hicieron
+aun mas absurdo. Uno controla cual de los cuatro pixels el video va a accesar.
+(Se pueden accesar los 4 a la vez). Hay una pieza de hardware que controla
+esto. Tengo sue¤o, as¡ que no voy a explicar las sandeces de c¢mo hacerlo.
+La rutina de PsetX tiene un ejemplo.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Resoluciones f¡sicas (display)
+ÚÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Resol.  ³ Pixels  ³  K  ³  P ginas ³  Comentario                           ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³320x200  ³ 64000   ³62.5 ³  4.096   ³  Ya lo conocen                        ³
+³320x240  ³ 76800   ³75.0 ³  3.413   ³  Pixels cuadrados. Corre a 60Hz       ³
+³360x200  ³ 72000   ³70.3 ³  3.640   ³                                       ³
+³360x240  ³ 86400   ³84.37³  3.034   ³                                       ³
+³376x282  ³ 106032  ³103.5³  2.472   ³  ** En mi monitor no trabaja          ³
+³320x400  ³ 128000  ³125.0³  2.048   ³  Muy usado en Amiga, menos los juegos ³
+³320x480  ³ 153600  ³150.0³  1.706   ³  Pixels aplastados y largos           ³
+³360x400  ³ 144000  ³140.6³  1.820   ³                                       ³
+³360x480  ³ 172800  ³168.7³  1.517   ³                                       ³
+³360x360  ³ 129600  ³126.5³  2.022   ³                                       ³
+³376x308  ³ 115808  ³113.0³  2.263   ³  ** En mi monitor no trabaja          ³
+³376x564  ³ 212064  ³207.0³  1.236   ³  ** En mi monitor no trabaja          ³
+³256x240  ³ 61440   ³60.0 ³  4.266   ³                                       ³
+³256x200  ³ 51200   ³50.0 ³  5.12    ³  Cinco p ginas de video               ³
+³256x154  ³ 39424   ³38.5 ³  6.649   ³  Seis p ginas de video                ³
+³256x282  ³ 72192   ³70.5 ³  3.631   ³                                       ³
+³256x70   ³ 17920   ³17.5 ³ 14.628   ³  Catorce p ginas de video             ³
+ÀÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Como rayos trabaja el hardware
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  El VGA tiene unos registros que contienen los valores que se usan para
+general la l¢gica de refrescar la pantalla. Pero como el hardware de la PC
+es semejante basura, hay pocos "ports" para accesar montones de registros.
+Aparte, CGA y MDA utilizaban algunos puertos de forma absurda que aun se
+mantiene por compatibilidad. Todos los registros VGA son 8 bit. Algunos
+requieren valores 9 o mas bits y hay que pasar las de Ca¡n porque hay que
+escribir los bits faltantes en otros registros.
+
+  Casi todos los registros de VGA consisten en dos direcciones. La primera
+es para escojer el registro a usarse (algo as¡ como la funci¢n) y la
+direcci¢n siguiente tiene el puerto da datos (escribir o leer). Por
+ejemplo (no lo escribas, no se que rayos hace!!):
+
+        mov     dx,SC_INDEX     ;-- Puerto de "screen index" (seleccion)
+        mov     al,5            ;-- Funci¢n 5
+        out     dx,al           ;-- output al puerto
+
+        inc     dx              ;-- Puerto de datos (leer/escribir)
+        mov     al,1
+        out     dx,al           ;-- Escribi contenido de registro.
+
+  Un truco para acelerar el acceso para escribir es usando un "out" 16 bit.
+El contenido de "al" se escribe en "dx" y el de "ah" va en "dx+1". S‚ que
+est  alreves, delen las gracias a los idiotas de Intel por hacer que el
+8086 accese los words alreves. (Es muy ch‚vere cuando tratas de leer un string
+en words, y cuando lees estructuras tipo "motorola" (el correcto) como los
+mods y gr ficas .lbm).
+
+        mov     dx,SC_INDEX     ;-- Puerto
+        mov     ax,0105h        ;-- Funci¢n 5, valor 1
+                                ;  (Ven lo ch‚vere que es hexadecimal?)
+        out     dx,ax           ;-- Zap!
+
+  Por desgracia hay registros de VGA que son taaaaaaaaaan leeeeeentooooos
+que si envias un words, no lo reconoce a tiempo y no hace nada! Adem s
+algunos registros est n protegidos (hay registros que desprotejen registros)
+y otros necesitan hacer salapastrosidades para accesarlos (hay uno que
+necesita que uno accese un registro para que el sea accesible).
+
+  Ya que los registros funcionan de manera tan absurda, tienen que recordar
+que si utilizo el registro 5 (ejemplo de arriba) de SC_INDEX, se va a quedar
+toda la vida apuntando a ese registro. As¡ que NOOOO pueden asumir que
+se van a quedar as¡ toda la vida cuando salen de la funci¢n. Adem s, es
+de muy mala educaci¢n modificar los registros en un interrupt y no
+dejarlo como estaba.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Funciones
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   modex_set(mode,width,height:word)
+
+ Esto activa una pantalla de ModoX. Hay algunas constantes de pantalla
+predefinidas en el unit MODEX. (Vean la tabla). El "width" es el ancho
+QUE DEBE SER IGUAL O MAYOR AL DE LA RESOLUCION. Hay que ser idiota para
+escojer M360x480 y poner un ancho de 320.
+
+  La altura "height" es un valor que no es necesario para el hardware de
+VGA pero si para las funciones de ModoX para saber las dimensiones l¢gicas
+de la pantalla. Es aconsejable que el ancho sea m£ltiplo de 4. Aunque es
+posible que VGA vuele en cantos si envias algo que no sea eso.
+
+  Ambos "width" y "height" son valores de la pantalla virtual (el tama¤o
+verdadero) y M360x480 es el tama¤o f¡sico de la pantalla. (O sea, estamos
+viendo 360x480 en el monitor (fisico) pero hay mas que no de ve (l¢gico).
+Lo importante es saber que (width/4)*height NOOOOOOOOOO puede pasar de
+65535 (64K de acceso a video) ya que el CPU puede dar un "Exception 13".
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   modex_to_13()
+
+ Esto pasa de modox modo 13. SOLO DEBES USARLO LUEGO DE HABER DEFINIDO LA
+PANTALLA CON modex_set(....).
+
+ Importante: Creo que no trabaja porque la pantalla se pone espantosa.
+ va a ser correjido en un futuro lejano.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   mode13_to_x()
+
+ Esto pasa de modo 13 a modo x. SOLO DEBES USARLO LUEGO DE modex_to_13() y
+HABER DEFINIDO LA PANTALLA CON modex_set(....)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   modex_to_16()
+
+ Esto pasa de modox a modo 16 colores. SOLO DEBES USARLO LUEGO DE HABER
+DEFINIDO LA PANTALLA CON modex_set(....). No se porque pongo esta funci¢n
+ya que no tenemos ning£n tipo de funci¢n para 16 colores.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   mode16_to_x()
+
+ Esto pasa de modo 16 a modo x. SOLO DEBES USARLO LUEGO DE modex_to_16() y
+HABER DEFINIDO LA PANTALLA CON modex_set(....).
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   xclear(color:byte)
+
+ Esto borra los 256K de video de VGA con el color correspondiente bien
+r pido. La funci¢n modex_set(...) borra los 256 tambi‚n...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   xcls(color:byte)
+
+ Esto borra la pantalla l¢gica del color que digas. Cuando digo l¢gica me
+refiero a las coordenadas que diste en modex_set(...). O sea, que si
+tienes modex_set(M320x200,640,350) - Voy a borrar 640x350, no la pantalla
+f¡sica de 320x200.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   xpset(x,y:integer; color:byte)
+
+ Esto tira un trapo de pixel en la pantalla. Es much¡simo mas lento que
+en modo 13, as¡ que no lo uses mucho.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   xpset4(x,y:integer; color:byte)
+
+ Esto tira de 1 a 4 pixels, DEPENDE COMO ESTE ESCOJIDO LOS BITPLANES A
+ACCESAR. Si lo usas luego de xpset(..) solo ver s un pixel y so lo usas
+luego de xcls(...) va a tirar 4 a la vez. La funci¢n x_writeplanes(...)
+escoje los planos a usar.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ZZZZZZZZzzzzzzzzzzzZZZZZZzzzzzzzzz Que sue¤o tengo. Escribir esto aburre.
+
+procedure xcopy(page1,page2:word);
+procedure xset_page(page:word);

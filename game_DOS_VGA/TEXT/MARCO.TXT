@@ -1,0 +1,169 @@
+ Game/VGA/Modex Libraries --- Changes/Revisision history
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Chaged all values to constants. Mode 13 only supports 320x200 so it's a
+  really absurd idea supporting variable resolutions.
+
+ş Palette commands total rewrites! Now VGA has a 768 byte buffer to update
+  and change the palette in RAM, then update quickly everything. However,
+  VGA hardware is CRIMINALLY slow - my changes don't speed up things as
+  I expected. (I hate PC. I hate VGA). (The rewrite had something wrong,
+  see explanation later).
+
+ş Now using more string commands. Rewrote BOXFILL, CLS, CPUT.
+
+ş PAL_MODIFY has a new parameter to synch to the VGA, and it HAD a BUG!
+  Now it works correctly, very different. The old version cleared colors
+  that should be too bright.
+
+ş New commands are VLINE, HLINE and BOX. All have clipping.
+
+ş New command: SEG2PTR(segment,offset) which converts a segment to a
+  far pointer. Turbo Pascal has a command that does that but C++ does not.
+
+ş Can't get it to work with C++. It's getting me mad.
+
+ş READ_PCX() sometimes displayed the *wrong* palette. Fixed. Now it
+  should read .PCX's 320x???x256 as long it's less than 204.
+
+ş The new Keyboard Manager is something I'm proud of! See KEY.PAS for
+  details. It provides a keyboard variable (readkey) and a table of
+  pressed keys (keyboard). Also it can "stop" a program by pressing
+  [Alt]+[SysRq] - much better than [Ctrl]+[C] because it can "uncrash"
+  a program. (Won't work in Windowze because it uses that key and my
+  hendler NEVER gets that value. You must change the program .PIF).
+
+ş There is a BIOSTEXT unit that manages stupid text routines, that
+  works in graphics mode. It also has a variable (_lastmode) that
+  can be used to reset the last mode.
+
+ş CPUT(...) has been rewritten. Now it's easier to understand the code
+  and should be faster.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ş All palette functions did something stupid! They did always write the
+  palette index, and this is not needed because it is *automatically*
+  incremented when r,g,b values are sent. (Silly me...)
+
+ş The BIOSTEXT unit has been killed and the KEY unit too, now they are
+  part of the GAME unit.
+
+ş Lotsa changes! Some MODEX routines are now in the VGA_HARD unit, some
+  VGA unit functions were moved into the GAME unit and so on.
+
+ş A GrowPut was made and later killed because it was somewhat sluggish,
+  I tried to call boxfill(...) to grow pixels, but it's too slow for me.
+
+ş The GAME unit is cool! It does a *lot* of things.
+
+ş New Paste function! It's a "mask put", a put that does not kill the
+  background and has clipping. It is a lot slower than normal put, so
+  use with moderation. :-)
+
+ş New pal_spread(...) command to create palettes "on the fly".
+
+ş ModeX is in progress...
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş "Get" HAD an *awful* error returning the wrong number of parameters.
+  The weird thing is that it never crashed!?! I just found it when
+  dealing with a program that needed a pointer and I sent the
+  pointer... of a pointer variable... Duh!
+
+ş boxfilladd(....) will implement the "shadebob" effect nicely,
+
+ş pasteadd(...) will enable to use multiple palettes of the same
+  images. (Not as good as I would like but something like that).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş boxfilladd(...) had a bug because I did not check if the width
+  was less than 4, so clipping failed miserably as well as the size.
+
+ş Everything now is in IDEAL mode! If you don't look at the source code,
+  you won't notice anything different.
+
+ş Now the palette routines are in the PALETTE unit.
+  **** PALETTE(..) IS NOW PAL_SET(...) ***
+
+ş And VGA unit has its own palette command. It is VGA_PAL(...). If you
+  won't make any kind of fading, you don't need to use the PALETTE unit.
+
+ş (These are comments of my personal experience with  undistributed code)
+
+	IDEAL mode uses the ENTER/LEAVE instructions and they seem to
+	become crashy if I use bp for my own stuff. That's why everything
+	crashed badly when I converted *all* asm code to IDEAL.
+
+	Instead of using commas , to separate parameters in Ideal mode I
+	mistakenly used the ; which is a comment - so a parameter was
+	actually a comment. Seems that Ideal used the parameter defined
+	in other procedure. The PAL_UNFADE was the one with the problem.
+	Geesh... Another Ideal quirk??
+
+
+ş The processor detection routine used in the GAME unit turned off
+  all interrupts! So, if you used a function that did not turn off the
+  interrupts and read the keyboard - your program surely crashed.
+  Worse, it was undetected until now because the MODE(...) call enabled
+  all ints for safety.
+
+  So if you turn all interrupts off with the "cli" instruction, the
+  keyboard handler does not run and your program will freeze to death
+  because the readkey variable was not updated.
+
+
+ş pal_spread(...) now works! Currently I have not moved it to the
+  PALETTE unit, so if you don't see it in there look at the MOUSE_BOB.PAS
+  program. This is a *cool* routine to create palettes "in realtime".
+
+ş VSYNCH(..) has been moved to the VGA_HARD unit.
+
+ş FILEIO unit!! It kills by a factor of zillions the pascal disk routines.
+  Gosh, pascal is abysmally slow! There's a buf_xxx(..) series of
+  functions that make disk access much faster!
+
+ş MINCRT unit!! It is a mini version because the whole MegaCRT eats 24k!!
+  It has simple text routines, with box and shadow! I haven't tested it
+  yet... Use at your own risk... (Better yet.. Test it for me.)
+
+ş ModeX PCX reader has a working assembler version!!!!!!!!!!!!!!!
+  Like almost all assembler programs it crashed in the first dozen
+  tries because I updated "si" instead of "di". Oh, well...
+
+  It works quite fast, but Mode13 PCX reader is twice as fast. However,
+  this ModeX PCX can read from external files - and admirably fast because
+  I use a buffered input. It is a bazillion times faster than any Turbo
+  Pascal equivalent because Pascal binary fileIO is the slowest thing
+  on earth. (Correction: Cassette IO is absolutely hateful).
+
+ş The ModeX_Set(...) and clearX(...) doesn't clear the screen as they
+  should. I'll correct them soon.
+
+ş Gosh! I have done a lot!
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Seems that the line command is wrong or the C++ compiler doesn't work.
+
+ş New pal_change(...) (mimics pal_modify(...) but it's better) and
+  pal_copy(...). Haven't tested them yet...
+
+ş X_PCX reads .PCX files in ModeX!! It works only with external files
+  only, I'll soon add an internal one like the one in VGA unit.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+Things possibly done
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Circle, Ellipse, CircleFill, EllipseFill. That would make VGA library
+  much better than Qbasic to make graphics.
+
+ş Shrink/Grow Put. I've always dreamed of seeing something like "Space
+  Harrier" on the PC.... Tried it.. Sloooooooooooooooooooooow!! Gee,
+  how do they do that on DOOM?
+
+ş ModeX under construction. Also, SIT (Sprite Image Table) is in the
+  "thinking about it" phase. There will be a special GET/PUT for ModeX
+  but I would love to know if they will work fast.
+
+ş Hmmm. Now the Network Graphic Format seems quite convicing...

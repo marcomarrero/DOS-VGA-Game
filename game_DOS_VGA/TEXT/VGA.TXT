@@ -1,0 +1,329 @@
+ÄÄÄÄÄÄÄÄÄÄ
+ VGA.TPU
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Copyright (c) 1995 Marco A. Marrero Ä Derechos reservados
+ Licencia para Trilogy Software.
+
+ Cualquier uso de estas rutinas por personas no pertenecientes de este
+ grupo es totalmente ilegal y se pueden tomar medidas legales bien feas.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Que rayos es
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA.TPU es una colecci¢n de rutinas para el famoso "modo 13h". Muchas
+de ellas tienen equivalentes en lenguajes mediocres como QuickBasic, y
+muchas no est n porque son absurdas para trabajar con gr ficas.
+
+  Turbo Pascal no provee ning£n tipo de soporte a este modo, y que bueno
+porque si lo tuviese lo mas seguro seria mas lento que una tortuga muerta.
+
+  Son rutinas hechas en assembler, usando instrucciones de 386. Aunque
+sigue corriendo en modo real. Ugh!
+
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  Manejo de VGA
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ VGA_PAL(color,r,g,b:byte)
+
+   Esta es una funci¢n repetida en PALETTE.TPU bajo el nombre de
+   "pal_entry". Se incluye aqu¡ por conveniencia.
+
+   Cambia el color especificado a que se vea con la combinaci¢n de
+   luminosidades del rojo, verde y azul.
+
+   Hay 63 luminosidades para cada uno, esto hace un total de 262,144
+   colores para escojer. (64*64*64). 0 es totalmente oscuro y 63 es
+   lo mas brillante que se puede.
+
+   Las combinaciones de colores son elementales, rojo+azul = rosa.
+   (No es rosa, sino magenta). rojo+verde=amarillo. (O mostaza,
+   dependiendo la luminsidad). Obviamente (0,63,63,63) pone el
+   color cero que se vea blanco. rojo+verde+azul=de gris a blanco
+   dependiendo la luminosidad.
+
+   Si el color 0 es negro, y se usa "PAL_ENTRY(0,63,63,63)", todo lo
+   que sea del color 0, se pone blanco. Esto NO modifica la memoria
+   de que haya en pantalla, sino como se va a ver en el monitor.
+   As¡ es que si la gr fica no tenia nada de color 0, el cambio no
+   se nota.
+
+   Otra cosa que parece confundir, es que es posible poner toditos
+   los colores que sean, que se yo, rojo. Si se hace eso, solo
+   vas a ver una pantalla totalmente roja aunque uses todos
+   los 256 colores. ("for x:=0 to 255 do palette(x,63,0,0)"). Hay
+   una funci¢n de VGA que cambia los 256 colores a cierta
+   combinaci¢n de un zopet¢n as¡ que ese loop no es necesario.
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ MODE(cual:word)
+
+   Esta funci¢n (vamos a dejar la sanganeria y asumir que una funci¢n
+   es un procedure o function) cambia a cualquier modo que el BIOS
+   tenga apoyo. Lo usual es el 3 (texto) y $13 (graficas).
+
+   QuickBasic tiene los modos **MAL** enumarados as¡ que debes acordarte
+   SIEMPRE que 320x200 en 256 colores es $13 (13h) y no 13.
+
+   Esto siempre borra la pantalla y pone el palette est£pido en 16 colores,
+   en que 0=negro, 1=azul, etc.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Manejo de pantallas
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ VGA_ADDR(donde:pointer)
+
+   Esto especifica a que lugar de memoria van a dibujar los comandos de
+   VGA.TPU. Se puede especificar cualquier memoria despu‚s que mida
+   64000 bytes. Al comenzar VGA.TPU, las rutinas dibujan a la pantalla.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ GETSCREEN(adonde:pointer)
+
+   Esto toma la pantalla completa (apuntado por el valor enviado a
+   VGA_ADDR(ppointer) y la copia a la memoria donde apunta el pointer.
+   Es importante que el pointer apunte a algo que tenga al menos 64000
+   bytes de memoria.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ PUTSCREEN(dedonde:pointer)
+
+   Esto copia la memoria donde el pointer apunte a la direcci¢n puesta
+   con VGA_ADDR(...). Si no se ha cambiado VGA_ADDR(...), es a la pantalla.
+
+   Permite copiar 64000 bytes de un lugar de memoria a otra, aunque se
+   supone que la idea es copiar de RAM a la pantalla VGA.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  VGAPUTSCREEN(where:pointer)
+
+   Esto copia lo que haya sido puesto VGA_ADDR(...) a la pantalla de video
+   f¡sico [a000h:0000]. As¡ que esta funci¢n siempre copia HACIA la pantalla
+   de video, desde lo puesto en VGA_ADDR(...).
+
+
+   Esto sirve para copiar de un area de memoria de 64000 bytes a video
+   [a000h:0000] sin tener que estar llamando VGA_ADDR(..) cada vez.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  n=READ_PCX(imagen,palette:pointer)
+
+
+   Esto lee una gr fica .PCX de 320x??? en 256 colores, en que ??? puede
+   ser un n£mero entre 1 y 200. TIENE que ser de 256 colores porque en 16
+   el algoritmo es totalmente distinto.
+
+   Paintbrush puede crear gr ficas, pero siempre graba los .PCX en 16
+   mugrosos colores aunque tengan 16 millones. (Si, las da¤a bien feo).
+   As¡ que es mejor grabarlas .BMP y usar un programa para pasarla a
+   PCX en 256 colores
+
+   El par metro "imagen" es un pointer a memoria donde est‚ la imagen y
+   "palette" es otro par metro donde apunta a una memoria de 768 bytes
+   donde va a poner el palette de la gr fica. La gr fica se pone en
+   la memoria donde haya sido puesto "VGA_ADDR(...)", o en la pantalla
+   de gr ficos.
+
+   Esto NOOOO lee la gr fica de disco. Dentro de poco tiempo voy a integrar
+   unas funciones de disco superiores a las porquerias que usa Turbo Pascal.
+   Mientras tanto, lo ideal es convertir la gr fica a un .OBJ con el
+   programa BINOBJ.EXE, y luego incluirla como un PROCEDURE. Varios de los
+   ejemplos hacen esto, pero para aquellos que no quieren perdel el hilo,
+   aqui va un ejeplo est£pido.
+
+   {$L c:\pune\cono\cara\xxx.obj}
+   procedure xxx; external;
+
+   var
+    pali : array[1..768] of byte;
+    eee  : pointer;
+
+   begin
+    READ_PCX(@xxx,@pali);
+    ... o ...
+    eee:=@pali;
+    READ_PCX(@xxx,eee);
+
+   Obviamente xxx es el nombre p£blico de el .OBJ, y el @ (at) indica que
+   quiero la direcci¢n del objeto. As¡ que @xxx es un pointer.
+
+   Un horror seria hacer esto: READ_PCX(@xxx,@eee)  ya que estariamos
+   enviado 768 bytes a la direcci¢n de "eee" que es un pointer en lugar
+   a donde apunta que es el array. (Escribiriamos encima de "eee" y 764
+   bytes frente a el).
+
+   PCX es un formato de gr ficas que hace maravillas cuando hay muchos
+   colores repetidos y es totalmente basura para gr ficas con muchos
+   cambios de colores (como fotos y gr ficas digitalizadas). Uf...
+   Que mucha explicaci¢n para algo tan £til...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Funciones de capturar
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  GET(x,y,x1,y1:integer; what:pointer)
+
+   Esto captura una porci¢n de la pantalla y la escribe en la direcci¢n
+   de memoria que indica el pointer.
+
+   Si las coordenadas son inv lidas, GET tratar  de corregirlas a menos
+   que trates de dar un GET a un lugar totalmente fuera de la pantalla.
+
+   Se supone que la memoria a donde apunta "what" tenga los bytes
+   sificientes ( total:=(x1Äx+1)+(y1Äy+1) + 4 ) para la imagen. Por ejemplo
+   parta capturar la pantalla completa, son 64000 bytes + 4 = 64004.
+
+   La funci¢n de Pascal "GETMEM(..)" reserva memoria del "heap", o sea
+   de la memoria libre, y se libera con "FREEMEM(...)". Ejemplo es:
+    ş GETMEM(ptr,64004)		Ä Reserva memoria, y "ptr" apunta a esta
+    ş FREEMEM(ptr,64000)	Ä Libera memoria donde apunta "ptr"
+
+   PASCAL libera la memoria cuando la aplicaci¢n termina, pero es bueno
+   liberarla si no se va a utilizar luego. DOS no...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PUT(x,y:integer; what:pointer)
+
+   Esto pone la imagen previamente capturada por GET, en las coordenadas
+   especificadas. Reemplaza todo lo que encuentre debajo. En otras palabras,
+   no tiene "masking".
+
+   NO TIENE CLIPPING! Si se pasa de los bordes horizontales, la imagen sale
+   por el otro lado y si se pasa de arriba y abajo el CPU marca un error
+   y "estrella" la computadora.
+
+   Est  disponible por razones de velocidad, pero "si se puede, solo ten
+   cuidado".
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  CPUT(x,y:integer; what:pointer)
+
+   Esto pone la imagen previamente capturada por GET, en las coordenadas
+   que pusiste. Reemplaza lo que tenga debajo, no tiene "masking".
+
+   SI tiene clipping! Si la imagen se pasa de los bordes, no se cruza ni
+   se estrella. As¡ que puede ir a donde le de la gana.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  CPASTE(x,y:integer; what:pointer)
+
+   Esto pone la imagen previamente capturada por GET, en las coordenadas
+   que pusiste. NO reemplaza lo que tenga debajo de los pedazos de color
+   0 (usualmente negro). As¡ que es un PUT con trasparencia (masking).
+
+   Si tiene clipping, y por el efecto de transparencia es mucho mas lento
+   que los otros. As¡ que este es trasparente en lo que sea negro y puede
+   ser colocado hasta en coordenadas negativas.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  CPASTEADD(x,y:integer; what:pointer, adder:word)
+
+   Esto pone la imagen previamente capturada por GET, en las coordenadas
+   que pusiste. NO reemplaza lo que tenga debajo de los pedazos de color
+   0 (usualmente negro). As¡ que es un PUT con trasparencia (masking)
+   y adem s le suma a la imagen fuente el n£mero espeficificado en
+   "adder".
+
+   Esto tiene el efecto de poder tener una sola imagen y tener varios
+   palettes, en lugar de tener varias im genes id‚nticas con distintos
+   colores. Esto hace la rutina mucho mas lenta, pero mas conveniente.
+
+   Si tiene clipping, y por el efecto de transparencia es mucho mas lento
+   que los otros. As¡ que este es trasparente en lo que sea negro y puede
+   ser colocado hasta en coordenadas negativas.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Funciones gr ficas
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  CLS(color:byte)
+
+   Esto borra del color especificado, en la memoria que haya sido
+   especificada VGA_ADDR(...), o en la pantalla de video.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  PSET(x,y:integer; color:byte)
+
+   Esto pone un miserable puntito (pixel) en las coordenadas x,y del color
+   especificado, en la memoria que haya sido especificada VGA_ADDR(...), o
+   en la pantalla de video. Si las coordenadas son err¢neas, no se pone
+   ning£n puntito. Mucha explicaci¢n para un est£pido puntito.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  byte:=POINT(x,y:integer)
+
+   Esto devuelve el color que hay debajo de las coordenadas x,y en la memoria
+   que haya sido especificada VGA_ADDR(...), o de la pantalla de video. Si
+   las coordenadas son ilegales, devuelve cero.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  BOXFILL(x,y,x1,y1:integer; color:byte)
+
+   Esto pone una caja rellena en las coordenadas x,y,x1,y1 del color
+   especificado, en la memoria que haya sido especificada VGA_ADDR(...), o
+   en la pantalla de video. Si las coordenadas son err¢neas, solo se dibuja
+   la porci¢n visible Ä si alguna. (Tiene clipping)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  BOXFILLADD(x,y,x1,y1:integer; adder:byte)
+
+   Esto pone una caja rellena en las coordenadas x,y,x1,y1 sumando a lo que
+   haya en pantalla con el valor, en la memoria que haya sido especificada
+   VGA_ADDR(...), o en la pantalla de video. Si las coordenadas son
+   err¢neas, solo se dibuja la porci¢n visible Ä si alguna.
+   (Tiene clipping).
+
+   Funciona para hacer "shadebobs"... Sufre Mario.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  DRAWTO(x,y,x1,y1:integer; color:word)
+
+   Esto dibuja una l¡nea desde las coordenadas x,y hasta x1,y1 del color
+   especificado, en la memoria que haya sido especificada VGA_ADDR(...), o
+   en la pantalla de video. Si las coordenadas son err¢neas, hay problemas
+   feos porque NO tiene CLIPPING!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  LINE(x,y,x1,y1:integer; color:word)
+
+   ESTA SI TIENE CLIPPING! Cortesia de Engel S nchez.
+   Esto dibuja una l¡nea desde las coordenadas x,y hasta x1,y1 del color
+   especificado, en la memoria que haya sido especificada VGA_ADDR(...), o
+   en la pantalla de video.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  HLINE(x,y,x1:integer; color:byte)
+
+   Esto dibuja una l¡nea horizontal desde las coordenadas x,y hasta x1,y
+   del color especificado, en la memoria que haya sido especificada
+   VGA_ADDR(...), o en la pantalla de video. Si las coordenadas son
+   err¢neas, solo se dibuja la porci¢n visible, si alguna.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  VLINE(x,y,y1:integer; color:byte)
+
+   Esto dibuja una l¡nea vertical desde las coordenadas x,y hasta x,y1
+   del color especificado, en la memoria que haya sido especificada
+   VGA_ADDR(...), o en la pantalla de video. Si las coordenadas son
+   err¢neas, solo se dibuja la porci¢n visible, si alguna.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  BOX(x,y,x1,y1:integer; color:word)
+
+   Esto pone una caja SIN rellenar en las coordenadas x,y,x1,y1 del color
+   especificado, en la memoria que haya sido especificada VGA_ADDR(...), o
+   en la pantalla de video. Si las coordenadas son err¢neas, solo se dibuja
+   la porci¢n visible Ä si alguna.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Ya... Por fin...

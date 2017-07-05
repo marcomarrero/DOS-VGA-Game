@@ -1,0 +1,345 @@
+ддддддддд
+  GAME
+ддддддддд
+ Game Manager v1.10 - Documentation/Information/Etc.
+ Copyright (c) 1995 Marco A. Marrero.
+
+дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ддддддддддддддддддд
+   Introduction
+ддддддддддддддддддд
+  This unit performs the special magic to get almost total control on
+the PC hardware. It has it own interrupt and keyboard handler, and can
+perform very low-level operations. It also has some text routines (using
+the BIOS) so you can avoid using <stdio.h>, <conio.h> and crt.tpu.
+
+
+ддддддддддддддддддд
+     Startup
+ддддддддддддддддддд
+  GAME starts automatically *before* your main program. That enables it
+to do several nice things before you get control. It does:
+
+	Ч Checks if it is a 386 computer. It will halt if not detected.
+	Ч Checks if you have a VGA/SVGA adapter. Will halt if not found.
+	Ч Will check if you have filled its data segment. (TP7 bug??)
+	Ч Store current video mode in global variable _lastmode.
+	Ч Get control of the keyboard and timer vector
+	Ч Turn off the keyboard leds
+
+
+  GAME will automatically restores everything back to normal, except
+memory if you use malloc. TP7 users should not worry about that. You
+can stop... Booooring....
+
+  Al comenzar a ejecutar, GAME toma control del teclado (INT 9), y del timer
+(INT 8). Adem═s lee en que modo (gr═fico/texto) est═ y lo guarda en
+_lastmode. Asi que si el programa sale sin errores, deberia salir usando
+"mode(_lastmode)" y luego "halt(0)" o "halt". Si sales con "halt(>0)", GAME
+va a llamar "mode(_lastmode)" (y borra todita la pantalla).
+
+  El manejador del teclado pone el valor de las teclas en "_readkey". Y el
+arreglo "keyboard[n]" tiene una tabla de teclas oprimidas (1) y no oprimidas
+(0) de acuerdo al scan code. Por ejemplo, si "keyboard[_esc]" es 1, esta
+apretada. Casi todas las teclas est═n definidas con "_" antes de letra
+o funci╒n. (hay una tabla al final).
+
+  El manejador del teclado pone los valores en las variables todo el tiempo.
+Llamar cualquier funci╒n del teclado (como READLN) es una estupidez y no
+va a funcionar. Tampoco hace caso de "numlock", "capslock" y esas
+sanganaces. Por eso se apagan todas al comenzar.
+
+  El manejador del tiempo (timer) tiene un "reloj", que son "timerw"
+y "frame". Estas son incrementadas cada ves que ocurre un
+"timer interrupt" y por lo general es 18.2 veces por segundo. Tu puedes
+cambiar la frecuencia del reloj del "timer", con "TIMER_TICK(n)".
+
+  Para detener un programa se oprime [Alt]+[SysRq]. Esto genera un error 255.
+Funciona en *todo* momento a menos que se estrelle el hardware o se apague
+el interrupt del teclado. Windows uses this combination for something else,
+so it won't work on Windows unless you set up the .PIF to avoid Windows
+to undeliver that keypress. (Remember that Windows simulates hardware).
+
+  Es recomendable en un 100% usar QEMM ya que reporta los errores en lugar
+de estrellar la computadora por relajar. Como sea, lo #1 es grabar todo el
+tiempo y para c╒digo chav╒n mejor hacer que SMARTDRV no haga "delayed"
+writes.
+
+  Por favor, NO uses CRT ni GRAPH! Esto puede causar *serias*
+icompatibilidades y cosas feas. GAME.TPU tiene funciones b═sicas para el
+manejo de texto.
+
+
+
+дддддддддддддддддд
+ Manejo de Errores
+дддддддддддддддддд
+ Un error ocurre cuando una llamada al sistema de Pascal falla, se oprime
+[Alt]+[SysRq] o se utiliza "HALT(n)" en que "n" es mayor a cero. (cero
+indica que no hubo error)
+
+ La variable "_errormsg" contiene un string con el mensaje que vas
+a ponerle al usuario.
+
+ El error #255 est═ reservado para el error cuando se oprime [Alt]+[SysRq],
+porque autom═ticamente _errormsg contiene que detuvieron el programa.
+
+
+ Cuando ocurre un error, el sistema hace lo siguiente:
+	Ч Repone el modo gr═fico en que estaba al comenzar (...text)
+	Ч Escribe un mensaje de error
+	Ч Repone la frecuencia de el timer a 18.2 por segundo
+	Ч Los vectores de interrupt 8,9 y 16h (emula el BIOS, pero mal)
+	Ч Permite los "Interrupts" de nuevo
+	Ч Activa los "leds" del teclado (como estaban)
+	Ч Desplega valores de registros.
+	Ч Blah, blah.
+
+ Si utilizas alguna otra cosa que requiera que se desinstale, NO va a
+trabajar bien con GAME. Un ejemplo son las funciones de GUS.
+
+
+дддддддддддддддддддддддддддддд  FUNCIONES  ддддддддддддддддддддддддддддддддддд
+
+ BIOSGOTOXY(x,y:byte)
+
+   Mueve el cursor a donde te de la gana. En la pantalla 320x200 el cursor
+   va de (1,1) a (40,25). Obviamente en modo gr═fico el cursor NO se ve.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BIOSCLS(color:byte)
+
+   Clears the screen. Works on screens up to 80x50.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BYTE=BIOSWHEREX()
+
+   Regresa posici╒n del cursor en x. Aunque no se vea.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BYTE=BIOSWHEREY
+
+   Regresa la posici╒n del cursor en y. Aunque no se vea.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BIOSTYPE(txt:string; color:byte)
+
+   Escribe en la pantalla el texto. Es lento a nivel de abuso.
+   No se porque rayos, pero la basura de BIOS no cambia el color si
+   la pantalla es de texto. Oh, bien... Abajo el BIOS, arriba programar
+   todo a rajatabla!
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ NUMX(val:string; value:word)
+
+   Convierte el valor a un string. La variable "_base" tiene la base a
+   usar (2=binario, 8=octal, 10=decimal y 16=hexadecimal). NO pone los
+   ceros que preceden. (3 binario = 111, no 000000000000111).
+
+   Ahora se llama "numx" porque antes cuando era "num", una funci╒n
+   compilaba lo mas feliz y en otra  no compilaba ni a palos. Solo lo
+   cambi┌ a "numx" y compila sin problemas... Como que pascal tiene
+   horrores bien feos por ah║...
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ NUMHEX(val:string; value:word)
+
+   Convierte el valor a string, en hexadecimal y con los ceros faltantes.
+   No modifica valor de variable "_base".
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ ECHONUM(num:word, color:word)
+
+   Escribe un numero hexadecimal en la pantalla usando el espantoso BIOS.
+   El color NO funiona en la pantalla de texto, culpa de los idiotas que
+   programaron el BIOS.
+
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BYTE=WHICH_VIDEO()
+
+   Devuelve en que modo de video est═ la tarjeta de gr═ficas. Hay unas
+   cuantas constantes pero imagino que la que importa es "VGAMONO" y
+   "VGACOLOR" (6,7).
+
+   GAME vomita si la tarjeta no es VGA, asi que esta funci╒n solo sirve
+   para saber si el usuario ve colores o grises en su VGA.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ WORD=JOYSTICK(cual:byte)
+
+   Devuelve el valor de la palanca. Los valores de "cual" son:
+	1 : Posici╒n de x, palanca 1
+	2 : Posici╒n de y, palanca 1
+
+	3 : Posici╒n de x, palanca 2
+	4 : Posici╒n de y, palanca 2
+
+   Ya que esta rutina es algo "util", porque los joysticks son estёpidos,
+   desconfiables y malos. Es posible que la PC se quede en un hermoso loop
+   infinito si no hay un joystick, o el motherboard no tiene uno.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BYTE=BUTTON()
+
+   Devuelve el estado de los botones. No ha sido probado y puede cambiar
+   el formato en el futuro.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ BYTE=PEEKB(addr:pointer,adder:word)
+
+   Devuelve un byte de el pointer + offset. Es para uso temporero ya que
+   es lento, estёpido y absurdo. Es bueno para cosas que no requieran
+   velocidad, y no quieras pelear con conversiones de pointers.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ WORD=PEEKW(addr:pointer,adder:word)
+
+   Devuelve un word de el pointer + offset. Es para uso temporero ya que
+   es lento. Quizas se parezca a QBASIC/QB pero no necesita la basura
+   de DEFSEG...
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ WORD=PTRSEG(buf:pointer)
+
+   Devuelve el offset de un pointer (offset a la direccion donde apunta!)
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ WORD=PTROFS(buf:pointer)
+
+   Devuelve el segmento de un pointer (segmento a la direccion donde apunta!)
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ INT_MASK_RSGISTER(which:byte)
+
+   Este registro indica cuales interrupts van a estar prendidos o apagados.
+   Si el bit es cero, lo activa. (Si es 1, lo apaga)
+	Ч IRQ 0		Timer (canal 0)
+	Ч IRQ 1		Teclado
+	Ч IRQ 2		CGA (??)
+	Ч IRQ 3		COM2
+	Ч IRQ 4		COM1
+	Ч IRQ 5		??
+	Ч IRQ 6		Diskette
+	Ч IRQ 7		Printer
+
+    No se donde accesar los IRQ del 8 al 11... Obviamente, si apagas
+    el teclado "readkey" y "keyboard" se quedan puyёs.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ KEY_LEDS(which:byte)
+
+   Activa/Desactiva los LEDs del teclado. Usa 3 bits, que son:
+	Ч Bit 0		Scroll Lock (Nisiquiera est═n en orden).
+	Ч Bit 1		Num Lock
+	Ч Bit 2		Caps Lock
+
+   Esta funci╒n es bastante lenta gracias a la porqueria de hardware de
+   IBM que no aguanta velocidad. Puede afectar el uso del teclado.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ TIMER_TICK(freq:word)
+
+   Cambia la frecuencia del reloj del sistema. La f╒rmula es:
+	Ч 1193180 / freq = Numero de veces por segundo.
+
+   Al salir, la hora se lee del CMOS y la frecuencia se repone para que
+   el reloj del sistema vuelva a la normalidad.
+
+   Por ejemplo, para poner el reloj a 70Hz (Hz=ciclos por segundo) tienes
+   que usar la formula:
+
+     1193180                Ejemplo:  1193180/18.2 = 65559 (65535)
+   ----------- = numero.
+       Hz
+
+   Asi que el BIOS usa una frecuencia de 65536. (Valor = 0)
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ SOUND(hz:word)
+
+   Activa un sonido y se queda chillando. Me pregunto si funciona.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ NOSOUND()
+
+   Apaga cualqier sonido chillando.
+ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+ WAITKEY()
+
+   Espera que oprimas cualquier tecla y que la sueltes. No vayas a
+   apagar el IRQ del teclado antes de llamar a esto..
+
+
+ддддддддддддддддддддддддддддддд  TECLADO  дддддддддддддддддддддддддддддддддддд
+
+
+дддддддддддддддддд
+ Variables teclado
+дддддддддддддддддд
+ Ч readkey	: Tiene el scancode. Si el bit 7 est═ activo, se solt╒
+		  la tecla. (O sea, si es > 127).
+
+ Ч keyboard[n]	: Tiene una tabla (basado en scan code) y tiene 0 si la
+		  tecla est═ suelta y 1 si est═ oprimida.
+
+дддддддддддддддддд
+ Tecla especial
+дддддддддддддддддд
+ Ч [Alt]+[SysRq] envia el error #255 y termina la ejecuci╒n.
+
+дддддддддддддддддд
+ Constantes
+дддддддддддддддддд
+ _space=57; _enter=28; _esc= 1; _tab=15; _crtl=29; _rshift=54;
+ _lshift=42; _alt=56; _caps=58; _up = 72; _down=80; _left=75;
+ _right=77; _num5=76; _pgup=73; _pgdn=81; _home=71; _end=79;
+ _ins=82; _del=83; _back=14;
+
+ _f1=59; _f2=60;  _f3=61;  _f4=62;  _f5=63; _f6=64; _f7=65; _f8=66;
+ _f9=67; _f10=68; _f11=87; _f12=88;
+
+ _a=30; _b=48; _c=46; _d=32; _e=18; _f=33; _g=34; _h=35; _i=23; _j=36;
+ _k=37; _l=38; _m=50; _n=49; _o=24; _p=25; _q=16; _r=19; _s=31; _t=20;
+ _u=22; _v=47; _w=17; _x=45; _y=21; _z=44;
+
+ _1=2; _2=3; _3=4; _4=5; _5=6; _6=7; _7=8; _8=9; _9=10; _0=11;
+
+
+дддддддддддддддддд
+ Variables "timer"
+дддддддддддддддддд
+ Ч timerw - Valor WORD que incrementa por cada "interrupt" del teclado.
+ Ч framew - ........
+
+ Ya que son variables, pueden ser borradas sin problemas. Es obvio y
+elemental que en un un WORD 65535+1=0
+
+
+дддддддддддддддддд
+ Scan Codes:
+дддддддддддддддддд
+Ё																																			 Ё
+Ё      0      1     2     3     4     5     6     7     8     9
+Ё    имммммямммммямммммямммммямммммямммммямммммямммммямммммяммммм╩
+Ё 0  ╨ N/A Ё Esc Ё  1  Ё  2  Ё  3  Ё  4  Ё  5  Ё  6  Ё  7  Ё  8  ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 10 ╨  9  Ё  0  Ё  -  Ё  =  ЁBacksЁ Tab Ё  Q  Ё  W  Ё  E  Ё  R  ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 20 ╨  T  Ё  Y  Ё  U  Ё  I  Ё  O  Ё  P  Ё  [  Ё  ]  ЁEnterЁCntrl╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 30 ╨  A  Ё  S  Ё  D  Ё  F  Ё  G  Ё  H  Ё  J  Ё  K  Ё  L  Ё  ;  ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 40 ╨  '  Ё  `  ЁlShifЁ  \  Ё  Z  Ё  X  Ё  C  Ё  V  Ё  B  Ё  N  ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 50 ╨  M  Ё  ,  Ё  .  Ё  /  ЁrShifЁPrtScЁ Alt ЁSpaceЁCapslЁ F1  ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 60 ╨ F2  Ё F3  Ё F4  Ё F5  Ё F6  Ё F7  Ё F8  Ё F9  Ё F10 ЁNumlk╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 70 ╨ScrolЁ HomeЁ Up  Ё PgUpЁKeyp-Ё LeftЁKeyp5ЁRightЁKeyp+Ё End ╨
+Ё    лмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьмммммьммммм╧
+Ё 80 ╨ DownЁ PgDnЁ Ins Ё Del ЁSysRqЁ     Ё     Ё F11 Ё F12 Ё     ╨
+Ё    хмммммомммммомммммомммммомммммомммммомммммомммммомммммоммммм╪
+юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд

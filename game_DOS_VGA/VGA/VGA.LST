@@ -1,0 +1,25 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   vga.asm
+*Warning* vga.asm(93) Segment alignment not strict enough
+*Warning* vga.asm(99) Segment alignment not strict enough
+*Warning* vga.asm(106) Segment alignment not strict enough
+*Warning* vga.asm(112) Segment alignment not strict enough
+*Warning* vga.asm(146) Segment alignment not strict enough
+*Warning* vga.asm(148) Pointer expression needs brackets
+*Warning* vga.asm(398) Segment alignment not strict enough
+*Warning* vga.asm(587) Segment alignment not strict enough
+*Warning* vga.asm(646) Segment alignment not strict enough
+*Warning* vga.asm(680) Segment alignment not strict enough
+*Warning* vga.asm(692) Segment alignment not strict enough
+*Warning* vga.asm(1502) Segment alignment not strict enough
+*Warning* vga.asm(1618) Segment alignment not strict enough
+*Warning* vga.asm(1636) Segment alignment not strict enough
+*Warning* vga.asm(1773) Segment alignment not strict enough
+*Warning* vga.asm(1905) Segment alignment not strict enough
+*Warning* vga.asm(1924) Segment alignment not strict enough
+Error messages:    None
+Warning messages:  17
+Passes:            3
+Remaining memory:  420k
+

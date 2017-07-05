@@ -1,0 +1,280 @@
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Unidad de Mouse v3.02
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Copyright (c) 1995 Marco A. Marrero. Derechos reservados.
+
+Gratis para todo el mundo. Solo deben poner mi nombre en los cr‚ditos
+del programa. El c¢digo fuente est  incluido e inclusive las
+formas del mouse.
+
+No se permite distribuir variaciones de estas rutinas. Si quiere contribuir,
+solo me envia la funci¢n y lo puedo hacer parte de esto. (Por favor, en
+lenguaje de ensamblador!). No necesariamente mi nombre tiene que estar en
+el programa, puede estar en la documentaci¢n.
+
+
+Mensaje para alejar a los abogados:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+No soy responsable por errores, fallos ni nada malo que mi programa
+cause en cualqier evento. Al usar mis funciones, est  deacuerdo que
+yo no tengo ning£n tipo de responsabilidad por fallos, icompatibilidad,
+caida del cabello, explosiones y mucho menos p‚rdida de dinero o
+trabajo resultado coincidencial o incidental, directa o inderecta
+de este programa. En otras palabras, no me hago responsable por nada,
+y si usa el software est  acordando tal afirmaci¢n.
+
+En otras palabras: Si pasa algo, yo no fui.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Que es?
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  Son funciones para utilizar el mouse. El mouse es un dispositivo
+usualmente optomec nico que normalmente controla una imagen en pantalla
+usado para seleccionar opciones y activar cosas. El trackball, y otros
+cosos similares funcionan como mouse.
+
+  Las PC nunca tuvieron un est ndar de mouse, hasta que Microsoft comenz¢
+a trabajar con Windows. Es obvio que los idiotas trabajando para IBM nunca
+vieron el fabuloso interfaz de usuario desarrollado por Xerox para los
+finales de los '70 de donde Sculley se plagi¢ las ventanas, ¡conos y mouse
+para ponerlas en la Macintosh. Como sea, el mouse en IBM es una cosa para
+remediar el dise¤o idiota de las PC que eran demasiado semejantes a los
+kits computadoras de 64K Z80 CP/M del 1978/79. (La PC es una CP/M mejorada,
+por eso escojieron la basura de 8086 (1978) y pidieron una versi¢n
+empeorada que es el 8088 usado en la primera PC. Si hubiesen querido
+lanzar algo avanzado podian haber usado el Motorola 68000).
+
+  Es muy interesante saber que la Amiga (1985) tiene un mouse pointer que es
+un "hardware sprite" que siempre est  encima de cualquier cosa. En cambio
+todas las dem s computadoras que usan mouse tienen un "software sprite" que
+a¤adiendo que es un 2000% mas lento que un "hardware sprite" (si, en serio,
+2000%. Con solo escribir dos words en Amiga uno cambia la posici¢n de un
+sprite. En la PC en gr ficos hay que restituir la pantalla y dibujar uno
+nuevo que toma 32*32 memoria dos veces.) uno tiene que apagarlo y prenderlo
+para que no interrupa las gr ficas por siempre ser parte de ellas.
+
+  Microsoft tiene funciones para el mouse, y esto a¤ade unas funciones que
+no est n. Y no uso otras que no las vi muy necesarias.
+
+  Existen "mouse" de tres botones pero ya que las rutinas de mouse son
+microsoftnianas, ning£n software los usa porque no es un est ndar. L stima
+que esos imb‚ciles no tengan ideas para poner en un tercer bot¢n. Solo
+preg£ntele a un usuario de CAD que haria con un bot¢n adicional... Al menos
+no es de un solo bot¢n como lo tienen que sufrir los usuarios de Macintosh.
+
+  Si los mouse en DOS se ven raros, es que miden 16x16 y en Windows miden
+32x32. Aparte, Windows permite un "color" adicional para transparencia y
+DOS no (en gr ficas). En texto el mouse es un cuadro espantoso.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Funciones
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_ON()
+
+   Esto verifica si hay un mouse driver, si el mouse est  conectado, hace
+   un "software reset" y luego lo prende. Lo interesante que simplemente
+   llamar a la func¡on del sistema se estrellar¡a de manera impresionante
+   en computadoras viejas porque el vector de interrupciones 33h (las
+   del mouse) tienen CERO. As¡ que hay un chin de c¢digo envuelto.
+
+   Asi ven que Microsoft no tenia la mas m¡nima idea de lo que era un
+   mouse al lanzar la PC. (Inclusive, Microsoft no hizo el DOS sino que
+   lo compr¢ a una compa¤ia que lo habia hecho para el chip 8086).
+
+   Si falla, la variable MOUSE es 65535. Si no, es cero.
+
+   Por favor recordeis que esta funci¢n prende el mouse.
+   Hay un errorcito que tiene... Esta funci¢n no hace un "hardware" reset
+   as¡ que si tienes un programa con mouse en la pantalla de 80x50, el
+   mouse va a tirar coordenadas hasta 80x50 aunque la hayas cambiado
+   a 80x25!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_SHOW()
+
+   Ense¤a el mouse en la pantalla. Si ya se ve, se va a seguir viendo, no?
+   Se utiliza generalmente luego de esconder el mouse con MOUSE_HIDE().
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_HIDE()
+
+   Esconde el mouse. Se pueden leer las coordenadas de un mouse escondido
+   al igual que uno visible.
+
+   Si se esconde el mouse varias veces, hay que reponerlo VARIAS veces
+   tambi‚n. Usualmente se esconde cuando se va a dibujar en la pantalla.
+
+   Tienen que recordar que el mouse es una imagen de "software" as¡ que
+   si dibujan la pantalla y mueven el mouse visible, va a haber basura
+   con el reguero del mouse y lo que se estaba dibujando. Esc¢ndanlo
+   antes de *cada* cosa que escriba a la pantalla.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSEK()
+
+   Esto lee las coordenadas del mouse y las pone en las variables "mx",
+   "my" y "mk" (donde mk: 1=Bot¢n 1, 2=Bot¢n 2 y 3=Ambos). Usualmente
+   el bot¢n 1 es el izquierdo.
+
+   Variables (otra vez por si olvidaste)
+	ş mx	- Coordenada en x en base a 640 (???)
+	ş my    - Coordenada en y en base a 200 (???)
+	ş mk	- Bot¢n. 0=No, 1=Izquierdo, 2=Derecho, 3=Ambos a dos
+
+	ş moved         - 1 si moviste el mouse, 0 si no.
+	ş clicked       - 1 si cambia el bot¢n de estado. (FL, NY, CA, etc...)
+
+   Las variables que se llaman "moved" y "clicked" se activan cuando las
+   coordenadas cambian o el mouse cambia de estado. Es decir, si el mouse se
+   mueve y lo detiene cambia "moved" de 1 a cero. Y clicked cambia a uno si
+   cambia de estado. (Si estaba oprimido y se suelta, o estaba suelto y se
+   oprime devuelve un 1).
+
+   Las coordenadas devueltas se basan a una pantalla de 640x200, a menos
+   que est‚ en un modo de 640x350 ¢ 640x480. Si est  en 320x200, "mx"
+   va a ser desde 0 a 640. En texto 80x25, los valores devueltos van a
+   ser 640x200 (dividan por 8 para dar 0..79,0..24). Mejor todavia,
+   usen (mk SHR 3) que es much¡simo mas r pido. (En C/C++ usen mk >> 3).
+   Si no sabes lo que es "shift right" o SHR te debes retirar de la
+   programaci¢n. Esto corre los bits tres veces hacia la derecha,
+   dividiendo por las potencias de 2. O sea, SHR 1=DIV 2, SHR 2=DIV 4,etc.
+
+   Microsoft inteligentemente nos obliga a llamar a un INT 33h, que
+   atrasa a cualquier programa de una manera espantosa. Otro "burra"
+   para los idiotas de Microsoft. Asi que llamar el mouse pone el
+   programa a arrastrarse por las ancantarillas. Aunque no tanto
+   como lo atrasa llamar rutinas del teclado de DOS.
+
+   Mejorado: Antes esta funci¢n sabia si movias el mouse deacuerdo si
+   mx,my, y mk eran distintos a la lectura de MOUSEK(). Ahora no hace
+   la comparaci¢n con estas variables por si acaso las tienes que
+   modificar. Asi que "mx","my" y "mk" se pueden modificar sin problemas.
+
+   Nadie ha preguntado de donde viene un nombre tan idiota como MOUSEK(...)
+   Esto viene de posiblemente la mejor implementaci¢n de BASIC de el
+   planeta y es GFA-BASIC para Atari ST. (Las otras versiones no sirven).
+   Como GFA-BASIC era alem n, es posible que sea "MOUSE_KORDINATE"...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_SET(x,y:word)
+
+   Esto pone el mouse en las coordenadas especificadas, siguiendo las
+   reglas absurdas de que en verdad es entre 0x0 Ä 640x200. No s‚ que
+   pasa si uno las pone fuera de la pantalla.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_WAIT()
+
+   Es una funcion hecha por mi, para que el mouse espere que uno le
+   suelte cualquier bot¢n que se est‚ oprimiendo.
+
+	ş Antes las variables del mouse no tomaban el valor en donde se
+	  solt¢ el mouse. Ahora si. As¡ que es posible que se oprima
+	  el bot¢n en cierto lugar y se suelte en otro, as¡ que hay
+	  que probar ambas posibilidades si es necesario.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  n:=MOUSE_AREA(buttn,x,y,x1,y1:word)
+
+   Devuelve si el bot¢n del mouse "buttn" est  en esa condici¢n (0=nada,
+   1=Bot¢n 1, 2=...) en las coordenadas especificadas. Si es falso, devuelve
+   cero.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_SHAPE(shape:pointer)
+
+   Pone el mouse de la forma especificada. Si est  en la pantalla de texto
+   va a salir un disparate porque el hardware idiota de IBM no puede hacer
+   lo que hacia el Atari 400 en el 1979. As¡ que es solo para gr ficas!!
+
+   Esta funci¢n sabe la figura anterior y no permite "re-establecerla",
+   como lo permite la funci¢n del sistema. As¡ se evita un parpadeo
+   salapastroso porque el mouse parpadea al cambiarse de forma. (¨Qu‚ esperas
+   de la basura que hace Microsoft?)
+
+   Hay varios pointer predefinidos con las formas del mouse. Estas son:
+	ş m_arrow       - Flecha, negra al estilo Macintosh y Atari ST
+	ş m_hour        - Reloj de arena movediza
+	ş m_help        - Un "baloon help", Un globito con ?
+	ş m_cross       - Un "crosshair" (mira). Como una cruz.
+	ş m_ibeam       - Una cosa bien fea. (lo usan los word processor)
+	ş m_marco       - Homenaje a un procer en el campro de programaci¢n
+	ş m_disk        - Un diskette 3.5.
+
+	ş m_larrow      - Flecha que apunta a la izquierda
+	ş m_rarrow      - Flecha que apunta a la derecha
+	ş m_uarrow      - Flecha que apunta hacia arriba
+	ş m_darrow      - Flecha que apunta hacia abajo
+	ş m_lrarrow     - Flecha que apunta a la izquierda y derecha
+	ş m_udarrow     - Flecha que apunta hacia arriba y abajo
+
+   Para a¤adir una figura, hay una forma bien sencilla...
+
+	1) Usar MOUSEDRW.EXE para dibujar el mouse
+	2) Convertirlo a un .OBJ con BINOBJ.EXE
+	3) Ponerlo en Turbo Pascal como "procedure" y que haga un "link"
+	   {$L mimouse.obj}
+	   procedure mimouse; external;
+
+	4) Llamar a MOUSE_SHAPE(@mimouse);
+	5) Ya!
+
+   La versi¢nes anteriores de la unidad de mouse (1.0 y 2.0) requerian
+   que para la forma hubiese adem n un n£mero entero para diferenciarlo.
+   Ya no es as¡, y para implementar sus propias formas es sencill¡simo.
+
+   El formato de la imagen del mouse es:
+	ş "Sinceramente no recuerdo"   	- Desiderio Cartagena
+	ş Es como la de Microsoft, pero tiene primero dos words para el
+	  hot-spot en x, hot spot y. Luego dos im genes 16x16, una el
+	  bitmap actual y otra el mask. Pero no recuerdo el orden...
+
+
+   Para hacer dibujos de mouse (y para poder compilar los que MOUSEDRW.EXE
+   hace) hay que hacer lo siguiente:
+        ş Usar BINOBJ.EXE (incluido en Turbo/Borland Pascal/C++)
+        ş Ponerlo dentro de el c¢digo como una funci¢n.
+                ş En C++, hay que a¤adirlo al project y poner
+                  extern "C" {
+                   extern pascal nombre();
+                  }
+
+                ş En Pascal es mucho mas f cil...
+                  {$L nombre.obj}
+                  procedure nombre; external;
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  veces:=MOUSE_PRESS(button:word)
+
+   Devuelve en "mx,my" las coordenadas donde se oprimi¢ el bot¢n y
+   cuantas veces se hizo. No la he usado aun y no se si funciona porque
+   no confio en DOS ni en nada que sea de Microsoft.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  veces:=MOUSE_RELEASE(button:word)
+
+   Devuelve en "mx,my" las coordenadas donde se solt¢ el bot¢n y
+   cuantas veces se hizo. (Esto es absurdo, no s‚ como demonios uno puede
+   contar cuantas veces uno solt¢ el bot¢n). (Me pregunto si copi‚ algo
+   mal o Microsoft hizo otra de sus cosas salapastrosas.)
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_WINDOW(x,y,x1,y1)
+
+   Hace que el mouse no pueda pasar luego de esas coordenadas. No he
+   usado eso todavia, es posible que (0,0) sea la esquina de la ventana
+   que especificaste.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  MOUSE_KAMIKAZE()
+
+   Hace que el mouse tenga un corto circuito y funda las resistencias.
+   Ojal .... En serio, hay mas funciones del mouse en los manuales que
+   tengo pero las encuentro raras y no creo que sean necesarias.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+					]\/[arco /=\. ]\/[arrero

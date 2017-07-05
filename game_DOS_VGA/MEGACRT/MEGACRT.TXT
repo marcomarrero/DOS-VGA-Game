@@ -1,0 +1,339 @@
+         MegaCRT v2.11
+ =============================
+ (c) 1992,95 Marco A. Marrero
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Ya que no tengo tiempo para hacer un documento, aqui solo hay par metros
+y observaciones.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+VARIABLES
+ÄÄÄÄÄÄÄÄÄÄ
+ page = array[0..8191] of byte  - Una pantalla completa
+
+ str80  = string[80]            - Strings mas comunes
+ str12  = string[12]
+ str128 = string[128]
+
+ black  = 0;    dkgray  = 8;    - Constantes de colores
+ blue   = 1;    ltblue  = 9;
+ green  = 2;    ltgreen = 10;
+ cyan   = 3;    ltcyan  = 11;
+ red    = 4;    ltred   = 12;
+ pink   = 5;    ltpink  = 13;
+ brown  = 6;    yellow  = 14;
+ ltgray = 7;    white   = 15;
+ hilite = 128;
+
+ co40 = 1;  co80 = 3;           - Constantes de modo de pantalla
+ bw80 = 7;
+
+ sysshadow : byte = $08         - Constante de sombra. (Hexadecimal)
+                                - Textcolor(0), Textbackground(8).
+
+ mk_left  = 1;                  - Constante de botones del mouse
+ mk_right = 2;
+ mk_both  = 3;
+ null     = 0;
+
+{----- "Flags" del teclado ----}
+ RShift=  1;  LShift=   2; Ctrl    =  4;  Alt    =   8;
+ Scroll= 16;  NumLock= 32; CapsLock= 64;  Insert = 128;
+
+{----- Valores de teclas variable "key" -----}
+ Space=  #32;  Enter= #13;  Esc= #27;  Tab= #9;  Backspace= #8;
+
+{---- Valores de teclas variable "ekey" -----}
+ Ins=#82;  Del=#83;   Home=#71;  Ed=#79;     PgUp=#73;
+ Up =#72;  Down=#80;  Left=#75;  Right=#77;  PgDn=#81;
+
+{---- Constantes para dibujar cajas -----}
+  thinbox  : str12 = 'ÚÄ¿ÀÄÙ³³³³³³';
+  thickbox : str12 = 'ÉÍ»ÈÍ¼ºººººº';
+  flatbox  : str12 = 'ÕÍ¸ÔÍ¾³³³³³³';
+  fillbox  : str12 = 'ÜÜÜßßßİİİŞŞŞ';
+
+{----- Informaci¢n de la pantalla -----}
+                                   {---------- 80x25 ------------ }
+ whole_screen    : word;           {-- Screen size  = 80x25 = 2000   }
+ down_lin        : word;           {-- Bytes x line = 80x2  = 160    }
+ screen_addr     : word;           {-- Screen seg   = $b800 if color }
+ cols,rows       : word;           {-- Columns      = 80 - 1 = 79    }
+ maxcols,maxrows : word;           {-- Rows         = 25 - 1 = 24    }
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Ya que MegaCRT puede usar cualquier tama¤o de pantalla, ya cuando tu
+programa corre estos valores tienen la informaci¢n de la pantalla
+actual. Es importante NO asumir que todo el mundo usa 80x25. Asi
+que "cols" y "rows" dicen cuanto mide la pantalla.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ xadd         : word;              {-- Window x upper area }
+ yadd         : word;              {-- Window y upper area }
+
+ display      : byte;              {-- Current display mode in use }
+ display_page : byte;              {-- Current display page }
+ screen_mode  : byte;              {-- Current video mode }
+ crtc         : word;              {-- CRTC address register / $3d4 color }
+
+ syscolor       : byte;            {-- Current Color }
+ output         : word;
+
+ screen1,screen2,screen3,screen4: pointer;	{-- screens }
+
+ key,ekey               : char;    {-- Key code / extended key code }
+ alternate,control      : char;    {-- Alt/Ctrl+letter combination }
+ fkey,afkey,cfkey,sfkey : byte;    {-- Alt/Crtl/Shift/None + Function key }
+
+ mx,my,mk,mouse : integer;         {-- Mouse variables }
+ moved,clicked  : byte;
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Funciones...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+procedure reset_screen;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Pone el texto gris claro y negro, Borra la pantalla, Apaga el mouse
+y ense¤a el cursor peque¤o. Es para limpieza antes de salir del programa.
+(Si hace falta BORRAR la pantalla). Esto NO termina el programa. Para
+ello usa halt(...).
+
+
+procedure vsynch;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Sincroniza con el monitor cuando no esta refrescando. Evita parpadeo
+si lo usas antes de dibujar en la pantalla.
+
+procedure delay(time:word);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Espera un ratito. NO es lo mismo que el delay de turbo pascal.
+
+procedure color(atxt,abkg : byte);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Escoje el color de texto y background de un tortazo.
+Tambien puedes hacer lo mismo con la variable "syscolor" mas r pido:
+color(15,4) -- equivale -- syscolor:=$4f
+
+procedure tcolor(atxt : byte);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Solo cambia el color del texto
+
+procedure bcolor(abkg : byte);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Solo cambia el color del background
+
+procedure cls(chr:char);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Borra toda la pantalla con el caracter que quieres
+
+procedure out_char(x,y:integer ; cha:char);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Envia un miserable caracter. Si lo mandas fuera de la pantalla, no vas
+a verlo.
+
+procedure mouse_on;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Prende el mouse y lo pone en pantalla. Si variable mouse=0 es que no
+se puede usar.
+
+procedure mouse_hide;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Esconde el mouse. DEBES esconderlo ANTES de CADA operaci¢n de la pantalla
+porque puede haber basura. Pero si lo escondes dos veces, tienes que
+desesconderlo dos veces.
+
+
+procedure mouse_show;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Ense¤a un mouse escondido, despu‚s que haya sido escondido una sola vez.
+Si escondes el mouse dos veces, y lo ense¤as una sola no vas a ver na'.
+
+procedure mousek;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Lee el mouse y usa las siguientes variables:
+ mx - Posicion de x
+ my - Posicion de y
+ mk - Boton. 0=no, 1=izqierdo, 2=derecho, 3=ambos
+ moved   - 0 = no has movido el mouse
+ clicked - 0 = no has apretado o soltado el boton.
+               (cuando aprietas y cuando sueltas)
+
+procedure mouse_set(x,y:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Pone el mouse donde te de la gana
+
+procedure mouse_wait;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Espera que sueltes los botones del mouse.
+
+function mouse_area(button,x,y,x1,y1:integer) : integer;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Te devuelve 0 si el button (0,1,2,3) NO es cierto O NO estas en esas
+coordenadas.
+
+procedure readkey;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Lee el teclado. key=teclas normales, ekey=teclas especiales.
+Si ekey=0 es que no estas oprimiendo nada. (NO espera input!!)
+Hay mas variables!!
+ Fkey    = 0..12 - Tecla F1..F12 oprimida?
+ SFKey   = 0..12 - Tecla Shift + F1..F12 oprimida?
+ CFkey   = 0..12 - Tecla Control + F1..F12 oprimida?
+ AFkey   = 0..12 - Tecla Alt + F1..F12 oprimida?
+
+procedure clear_buffer;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Borra el buffer del teclado
+
+procedure gotoxy(col,row:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Pone el cursor en ese lugar. SOLO afecta cursor si es visible y los
+comandos de Writeln, Write.
+
+function keyboard_flags : word;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Te devuelve un word con el siguente significado (posiciones de bits):
+ RShift=  1;  LShift=   2; Ctrl    =  4;  Alt    =   8;
+ Scroll= 16;  NumLock= 32; CapsLock= 64;  Insert = 128;
+ a:=keyboard_flags;
+ if (a AND Rshift)=Rshift then Write('Oprimiste [Shift] derecho.');
+ if (a AND Alt)=Alt then write('Oprimiste [Alt].');
+
+ if ((a AND CapsLock)=CapsLoc) and ((a and Numlock)=Numlock) then
+   Write('Tienes [Caps] y [Num] oprimidos a la vez');
+
+
+procedure Wait_Event;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Espera que oprimas cualquier boton del mouse, o una tecla.
+
+procedure init_video;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Se usa automaticamente para determinar el tipo de pantalla. (MegaCRT
+reconoce sin problemas pantallas hasta de 80x100 o 160x50). TIENES
+que usarlo si cambias de modo de pantalla.
+
+procedure mode(mode:word);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Cambia de modo de texto o gr fico. Mode(0) y (1) son texto 40x25 y
+Mode(2) y (3) son texto 80x25. No se cual es el de 80x50.
+TIENES QUE LLAMAR A init_video LUEGO DE USAR mode(...)
+
+procedure cursor_off;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Apaga el cursor. Puedes apagarlo cuantas veces te venga en ganas.
+
+procedure cursor_small;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Cursor finito. (el com£n)
+
+procedure cursor_big;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Cursor gigante como el de GWBasic
+
+procedure cursor_half;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Cursor a medio como lo usa Doskey y Qedit
+
+procedure clear_line;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Borra la linea de abajo.
+
+procedure hline(x,y,x1:integer ; first,mid,last:char);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Linea horizontal en x,y hasta x1. Y los caracteres a usar, el primero
+los del medio y el ultimo. Si te pasas de los bordes no se ven.
+(Acepta coordenadas negativas).
+
+procedure vline(x,y,y1:integer ; first,mid,last:char);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Lo mismo que el de arriba pero vertical.
+
+procedure print(x,y:integer; var txt:string);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Pone un string en donde te de la gana. Se puede cruzar por los bordes.
+Por ejemplo: print(-1,1,'Ho'); solo imprime una o.
+
+procedure Fill(x,y,x1,y1:integer ; paint:char);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Esto dibuja una caja rellena con el caracter que te de la gana.
+NO es el fill de Qbasic de rellenar figuras.
+
+procedure get_screen(page:pointer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Captura la pantalla y la pone en la direccion a que apunta el pointer.
+Los pointers predefinidos son:
+ SCREEN1, SCREEN2, SCREEN3, SCREEN4.
+
+procedure put_screen(page:pointer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Pone la pantalla.
+
+procedure scroll_l(x,y,x1,y1:integer);
+procedure scroll_u(x,y,x1,y1:integer);
+procedure scroll_r(x,y,x1,y1:integer);
+procedure scroll_d(x,y,x1,y1:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Corre la porcion de la pantalla que pongas hacia una direcci¢n.
+scroll_l=scroll left.
+
+procedure tbox(x,y,x1,y1:integer ; var bar:str12);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Dibuja una caja hueca donde te de la gana con los bordes de un estilo
+predefinido. Te puedes pasar por los bordes y hasta dar coordenadas
+negativas. Las partes que no caen en la pantalla no se van a ver.
+Estilos predefinidos:
+  thinbox  : str12 = 'ÚÄ¿ÀÄÙ³³³³³³';
+  thickbox : str12 = 'ÉÍ»ÈÍ¼ºººººº';
+  flatbox  : str12 = 'ÕÍ¸ÔÍ¾³³³³³³';
+  fillbox  : str12 = 'ÜÜÜßßßİİİŞŞŞ';
+
+procedure tboxfill(x,y,x1,y1:integer ; var bar:str12);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Es como la caja de arriba pero es rellena.
+
+procedure window(x,y,x1,y1:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Especificas en que porciones de la pantalla se permite escribir las cosas.
+Es decir, todo lo que se salga de las coordenadas que especifiques no
+se van a ver. La coordenada (0,0) va a ser ahora (x,y).
+
+procedure reset_window;
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Arregla cualqier reguero que hayas puesto con window(.....)
+
+procedure shadowbox(x,y,x1,y1:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Dibuja la porci¢n de la sombra de una caja. Es decir, NO dibuja
+una caja con sombra sino la sombra de una caja en esas coordenadas.
+ tboxfill(1,1,10,10,thinbox);
+ shadowbox(1,1,10,10);
+
+procedure shadow_x(x,y,x1 : integer);
+procedure shadow_y(x,y,y1 : integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Tira lineas de sombra. Solo cambian el color por donde pase a gris
+oscuro de letras y fondo negro.
+
+procedure help(bs:string);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Dibuja informacion el la linea de abajo de la pantalla.
+
+procedure nosound;
+procedure sound(Hz:word);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Tira sonido. (No he probado esto!!!)
+
+procedure lowcase(var bs:string);
+procedure upcase(var bs:string);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Convierte en min£sculas y may£sculas de un cantazo.
+
+
+procedure vgapalette(color,red,green,blue:integer);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Cambia el color a la paleta correspondiente. No te explico bien
+esto porque no funciona bien porque no todos los 16 colores
+pueden ser cambiados.
+
+color=0..16,   red,green,blue= 0..63,0..63,0..63.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

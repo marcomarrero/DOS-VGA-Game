@@ -1,0 +1,142 @@
+ÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ VGA_HARD.TPU
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Copyright (c) 1995 Marco A. Marrero Ä Derechos reservados
+ Licencia para Trilogy Software.
+
+ Cualquier uso de estas rutinas por personas no pertenecientes de este
+ grupo es totalmente ilegal y se pueden tomar medidas legales espantosas.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Que rayos es
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_HARD.TPU es una colecci¢n de rutinas para menejo del hardware de
+VGA. Son bien salapastrosas para entender, y como todo hardware da un
+poco de trabajo usarlas bien pero permiten cosas bien interesantes que
+son millones de veces mas r pido que soluciones en software.
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Rutinas
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_POS(int x)
+
+ Esto permite "scrolling", o sea, mover la pantalla donde te de la gana.
+ Cada n£mero representa 4 pixels en modo 13/x. Para hacer scrolling
+ vertical, solo tienes que sumar/restar (tama¤o de la pantalla/4). O sea,
+ si la pantalla es de 320x200 solo sumas/restas 80.
+
+ El scrolling horizontal solo se ve bien en ModoX ya que permite pantallas
+ "virtuales" de mas de 320. Por ejemplo, tu puedes ver 320x200 pero la
+ pantalla "virtual" es de 640x200. (Solo ves 320x200 en el monitor). Pues,
+ entonces se puede hacer scrolling horizontal (para ver hasta 640) y el
+ vertical es sumando/restando 160. (640/4=160).
+
+ Para scrolling bien puro, tienes que usar el VGA_PAN(x).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_PAN(pan:byte)
+
+ Esto permite que la pantalla se ponga en pixels en lugar de 4 a la vez.
+ O sea, que con la combinaci¢n de VGA_POS(..) y VGA_PAN(..) se puede hacer
+ scrolling horizontal puto (pixel a pixel).
+
+ El valor "pan" solo permite el valor de 0..3 en ModoX/13. En modo de texto
+ permite mas valores.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_PAN_C()
+
+ Esto se llama "pixel pan compatibility" y en verdad no tengo idea lo que
+ hace. Es posible que algunas SuperVGA se tripeen con el VGA_PAN() as¡ que
+ es buena idea usar VGA_PAN_C() al cambiar de modo gr fico por si las
+ dudas.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_WPLANE(plane:byte)
+
+ Esto dice que planos de ModoX (bitplanes) se pueden accesar al escribir.
+ Mas sencillo, estos cuatro bits (00001111) permite el acceso a
+ cuatro pixels a la vez, por lo tanto al enviar un byte a video escribe
+ los cuatro de cantazo.
+
+ Si quieres solo escribir un solo pixel, pones el bit del pixel que
+ quieres leer y llamas a VGA_WPLANE(...).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_RPLANE(plane:byte)
+
+ Esto dice que planos de ModoX (bitplanes) se pueden accesar al leer.
+ Cuando uno lee un byte en memoria de ModoX, los "latches" leen lo que
+ se haya esoecificado en VGA_RPLANE(...) pero no significa que el
+ registro a donde se ley¢ tiene el valor correcto!
+
+ As¡ se activa un solo pixel a leer (y recibir bien) o se ponen los
+ 4 pixels a la vez para transferencia de video 32 bits a la vez.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  VGA_WMODE(mode:byte)
+
+ Hay cuatro modos de escritura (0-3), y son los siguientes:
+
+	1. Tengo sue¤o, lo hago mas tarde.
+        2. Hoy es otro dia. Pero tengo sue¤o hoy tambi‚n. ZzzZzz
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ VGA_RMODE(char mode)  Sets vga read mode (0,1)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ VGA_SPLIT(int scanlin)  Splits screen at scanline
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+VGA_VBLANK(int start,end)  Set VGA blanking limits
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+HSYNCH()        Synch to the horizontal int
+video_hirez()   No hace diferencia dramatica
+video_lorez()   No hace gran cosa
+scan_height(num:byte)   Cool!
+screen_off;     funciona bien!
+screen_on;      no trabaja!!!!! @#%^&*!@%@!%&%* hardware!!! VGA basura!!!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ VWAIT()
+
+   Espera que el monitor est‚ en el "vertical interrupt", "vertical blank"
+   o "vertical retrace". (Las tres estupideces son lo mismo). Esto ayuda
+   a minimizar el parpadeo, aunque esto dura muy poco tiempo.
+
+   Si al llamar a VWAIT() el monitor est  en el retrace, simplemente se sale
+   y no espera nada. Por ende, los resultados pueden variar. Y es posible
+   que en llamadas sucesivas el monitor est‚ en "retrace" asi que pareceria
+   que no tiene efecto.
+
+   Por ejemplo: "wvait;vwait;" puede ser que espere un poquito a esperar
+   el "retrace" pero para la seguna vez el monitor est  aun en "retrace"
+   y sale inmediatamente.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ VSYNCH(numero:word)
+
+   Espera que el monitor est‚ en el "vertical interrupt", "vertical blank"
+   o "vertical retrace" una vez adicional al n£mero de veces que se pone.
+   O sea, que VSYNCH(0) espera 1 sola vez. Esto minimiza el parpadeo si
+   lo que se va a hacer dura poco tiempo, porque si no puede empeorar el
+   parpadeo.
+
+
+   Si al llamarlo el monitor est  en el "retrace", espera a que salga
+   y espera de nuevo a que ocurra. Sirve como funci¢n para esperar.
+
+   No todas las tarjetas VGA sincronizan bien, y bajo Windows y OS/2
+   nada sincroniza porque estos simulan el acceso a hardware.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ VSKIP()
+
+   Espera que el monitor NO est‚ en el "vertical retrace". Si lo est , va
+   a esperar hasta que termine.
+
+   No se para que usarlo pero se ve lindo tenerlo.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

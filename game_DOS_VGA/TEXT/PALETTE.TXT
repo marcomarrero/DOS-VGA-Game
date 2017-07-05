@@ -1,0 +1,171 @@
+ÄÄÄÄÄÄÄÄÄÄÄÄ
+ PALETTE.TPU
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Copyright (c) 1995 Marco A. Marrero Ä Derechos reservados
+ Licencia para Trilogy Software.
+
+ Cualquier uso de estas rutinas por personas no pertenecientes de este
+ grupo es totalmente ilegal y se pueden tomar medidas legales abusivas.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Que rayos es
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Son rutinas para manejar colores. En Modo 13 y ModoX tu tienes 256
+colores, y cada uno tiene un "palette" que consiste en 262,144 combos.
+(64 tonos de rojo, verde y azul (0..63). 64*64*64 = 262,144).
+
+ Tambi‚n trabajan con cualquier otro modo de VGA, inclusive texto, pero
+si es de 16 colores hay que llamar la rutina de "
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Funciones para los colores
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_ENTRY(char color,red,green,blue)
+
+   Cambia el color especificado a que se vea con la combinaci¢n de
+   luminosidades del rojo, verde y azul.
+
+   Hay 63 luminosidades para cada uno, esto hace un total de 262,144
+   colores para escojer. (64*64*64). 0 es totalmente oscuro y 63 es
+   lo mas brillante que se puede.
+
+   Las combinaciones de colores son elementales, rojo+azul = rosa.
+   (No es rosa, sino magenta). rojo+verde=amarillo. (O mostaza,
+   dependiendo la luminsidad). Obviamente (0,63,63,63) pone el
+   color cero que se vea blanco. rojo+verde+azul=de gris a blanco
+   dependiendo la luminosidad.
+
+   Si el color 0 es negro, y se usa "PAL_ENTRY(0,63,63,63)", todo lo
+   que sea del color 0, se pone blanco. Esto NO modifica la memoria
+   de que haya en pantalla, sino como se va a ver en el monitor.
+   As¡ es que si la gr fica no tenia nada de color 0, el cambio no
+   se nota.
+
+   Otra cosa que parece confundir, es que es posible poner toditos
+   los colores que sean, que se yo, rojo. Si se hace eso, solo
+   vas a ver una pantalla totalmente roja aunque uses todos
+   los 256 colores. ("for x:=0 to 255 do palette(x,63,0,0)"). Hay
+   una funci¢n de aqui que cambia los 256 colores a cierta
+   combinaci¢n de un zopet¢n as¡ que ese loop no es necesario.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_SET(cual:pointer)
+
+   Pone los colores deacuerdo a los valores de una tabla adonde "cual"
+   apunta. Esto pone los 256 colores de lo que contenga la tabla (de
+   768 bytes porque 256*3=768, donde 3=rojo,verde y azul.).
+
+   Un ejemplo, es cuando se usa "READ_PCX(...)" para poner la paleta
+   de la gr fica.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_ALL(red,green,blue:word)
+
+   Esto pone TODOS los colores a esta combinaci¢n en espec¡fico. Es
+   muy ch‚vere para hacer todos los colores negros, dibujar sin que
+   se note y luego ponerlos todos a lo que son.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+  PAL_FADE(cual:pointer; delay:word)
+
+   Esto hace que el palette a donde apunta "cual" vaya poniendose oscuro
+   hasta que no se vea nada. El "delay" es la espera sincronizada, donde
+   0 hace que no espere. Esto NO cambia el palette a donde apunta "cual",
+   lo deja intacto.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_LIGHT(cual:pointer; delay:word)
+
+   Esto hace que el palette a donde apunta "cual" vaya poniendose claro
+   hasta que se vea todo blanco. El "delay" es la espera sincronizada,
+   donde 0 hace que no espere.
+
+   Esto NO cambia el palette a donde apunta "cual", lo deja intacto.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_UNFADE(cual:pointer; delay:word)
+
+   Esto hace que el palette a donde apunta "cual" vaya poniendo desde
+   negro total hasta el palette que tiene la tabla. El "delay" es la
+   espera sincronizada, donde 0 hace que no espere. Esto NO cambia
+   el palette a donde apunta "cual", lo deja intacto.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_UNLIGHT(cual:pointer; delay:word)
+
+   Esto hace que el palette a donde apunta "cual" vaya poniendo desde
+   todo blanco hasta el palette que tiene la tabla. El "delay" es la
+   espera sincronizada, donde 0 hace que no espere. Esto tambi‚n
+   sucede si se acost¢ y respir¢ profindamente como dije. Esto NO cambia
+   el palette a donde apunta "cual", lo deja intacto.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_MODIFY(delay:integer; cual:pointer; r,g,b:integer)
+
+   Esto hace que la paleta a donde apunta "cual" se modifique con los
+   colores especificados y esperando el tiempo deacuerdo a "delay".
+
+   Esto NO cambia el palette a donde apunta "cual", lo deja intacto.
+
+   NO es algo continuo, sino inmediato. Los valores se le suman a los
+   colores, as¡ que si se pone mucho rojo ("r") toda la pantalla de ver 
+   mas rojiza.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_WORK2PAL(cual:pointer)
+
+   Esto hace que copie un "working" palette a donde apunta "cual".
+   Cada vez que se utilizan los comandos que modifican el palette,
+   EXCEPTO palette, VGA crea una tabla para efectar los cambios.
+
+   Es £nico uso interesante es para poder obtener el cambio hecho por
+   "PAL_MODIFY(...)"
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  VGA_PAL16()
+
+   Esto permite que se pueda cambiar el palette estilo VGA en pantallas
+   de 16 colores (a la EGA). Los ingenieros idiotas de hardware quisieron
+   compatibilidad con EGA y terminaron con la idiotez que hay que activar
+   este "truco" para que VGA reconozca los 16 colores del 0..15 sin
+   problemas.
+
+   Sin esto, los colores como el 7 serian incambiables bajo VGA, pero si
+   bajo EGA que es asqueroso por solo permitir 64 colores por todo.
+   (La misma calidad que el Nintendo del 1982).
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  PAL_SPREAD(r,g,b:word; void far *pal; r+,g+,b+d:integer; start,end:word)
+
+    Esto crea una gama de colores en la estructura de pal. Como hay
+    muchos par metros, voy a describirlos en grupitos...
+
+        void far *pal   : Pointer a estructura de palette.
+        r, g, b         : Paleta inicial (pero no se usa)
+        r+,g+,b+        : Suma/Resta para paleta inicial
+        start,end       : De que color hasta cual
+
+    Por ejemplo, para crear un arcoiris desde el color 0 al 63 de los
+    64 tonos de azul, solo digo: pal_spread(0,0,-1,@pal,0,0,1,0,63).
+    F¡jate que empez‚ con -1 porque siempre se suma/resta primero.
+    En este caso, 0,0,-1 comienza con el azul en -1, se le suma/resta
+    a r,g,b --> 0,0,1 (que solo imcrementa el azul) y cambia los
+    colores desde el 0 al 63.
+
+    Si no entiendes nada (aparque de tener menos I.Q. que un pote de
+    mayonesa) mira el ejemplo de \SAMPLES\MOUSEBOB.PAS.
+
+    Este ejemplo crea 128 tonos de azul... Tienes que entender que
+    si hay un color menos de cero se interpreta como cero y si hay
+    uno mayor de 63 se interpreta como 63.
+            pal_spread(0,-63,-1, @pal, 0,1,1, 0,127);
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Hay dos funciones mas, pero no las he probado y no tengo ganas de ponerme
+a escribir ahora...
